@@ -1,3 +1,5 @@
+import DropZone from "@/components/dropzone";
+
 export default function Home() {
   return (
     <main className="space-y-6 pb-8">
@@ -12,6 +14,8 @@ export default function Home() {
           redefine your digital experience with Convio today!
         </p>
       </div>
+
+      <DropZone/>
     </main>
   );
 }
