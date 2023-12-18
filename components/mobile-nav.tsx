@@ -19,24 +19,22 @@ const MobileNav = () => {
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetDescription>
-            <div className="w-full space-y-3">
-              <Link href="/">
-                <Button variant="link" className="font-semibold w-full ">
-                  Home
-                </Button>
-              </Link>
-              <Link href="/about">
-                <Button variant="link" className="font-semibold w-full">
-                  About
-                </Button>
-              </Link>
-              <Link href="/privacy-policy">
-                <Button variant="link" className="font-semibold w-full">
-                  Privacy Policy
-                </Button>
-              </Link>
-            </div>
+          <SheetDescription className="w-full space-y-3">
+            <Link href="/">
+              <Button variant="link" className="font-semibold w-full ">
+                Home
+              </Button>
+            </Link>
+            <Link href="/about">
+              <Button variant="link" className="font-semibold w-full">
+                About
+              </Button>
+            </Link>
+            <Link href="/privacy-policy">
+              <Button variant="link" className="font-semibold w-full">
+                Privacy Policy
+              </Button>
+            </Link>
           </SheetDescription>
         </SheetHeader>
       </SheetContent>
