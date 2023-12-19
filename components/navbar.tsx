@@ -17,6 +17,7 @@ const Navbar = () => {
         />
         <h1 className="text-3xl font-semibold">Convio</h1>
       </Link>
+      
       <div className="gap-1 md:gap-2 lg:gap-4 hidden md:flex">
         <Link href="/">
           <Button variant="ghost" className="font-semibold ">
@@ -28,7 +29,7 @@ const Navbar = () => {
             About
           </Button>
         </Link>
-        <Link href="/about">
+        <Link href="/privacy-policy">
           <Button variant="ghost" className="font-semibold ">
             Privacy Policy
           </Button>
@@ -48,7 +49,7 @@ const Navbar = () => {
         </Button>
       </Link>
 
-      <MobileNav/>
+      <MobileNav />
     </nav>
   );
 };
