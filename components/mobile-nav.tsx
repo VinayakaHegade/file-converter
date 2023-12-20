@@ -30,6 +30,11 @@ const MobileNav = () => {
                 About
               </Button>
             </Link>
+            <Link href="https://github.com/VinayakaHegade/file-converter">
+              <Button variant="link" className="font-semibold w-full">
+                Github
+              </Button>
+            </Link>
             <Link href="/privacy-policy">
               <Button variant="link" className="font-semibold w-full">
                 Privacy Policy
