@@ -8,6 +8,9 @@ import { FiUploadCloud } from "react-icons/fi";
 import { LuFileSymlink } from "react-icons/lu";
 import { useToast } from "./ui/use-toast";
 import { Skeleton } from "./ui/skeleton";
+import fileToIcon from "@/utils/file-to-icon";
+import compressFileName from "@/utils/compress-file-name";
+import bytesToSize from "@/bytes-to-size";
 
 const DropZone = () => {
   const [isHover, setIsHover] = useState<boolean>(false);
@@ -62,6 +65,21 @@ const DropZone = () => {
             {!isLoaded && (
               <Skeleton className="h-full w-full -ml-10 cursor-progress absolute rounded-xl" />
             )}
+            
+            <div className="flex gap-4 items-center">
+              <span className="text-2xl text-orange-600">
+                {fileToIcon(action.file_type)}
+              </span>
+              <div className="flex items-center gap-1 w-96">
+                <span className="text-md font-medium overflow-x-hidden">
+                  {compressFileName(action.file_name)}
+                </span>
+                <span className="text-gray-400 text-sm">
+                  ({bytesToSize(action.file_size)})
+                </span>
+              </div>
+            </div>
+
           </div>
         ))}
       </section>
