@@ -5,7 +5,7 @@ import { accepted_files, extensions } from "@/config/constants";
 import { Action } from "@/types";
 import compressFileName from "@/utils/compress-file-name";
 import fileToIcon from "@/utils/file-to-icon";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactDropzone from "react-dropzone";
 import { FiUploadCloud } from "react-icons/fi";
 import { LuFileSymlink } from "react-icons/lu";
@@ -31,7 +31,6 @@ const DropZone = () => {
   const [files, setFiles] = useState<Array<any>>([]);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [defaultValues, setDefaultValues] = useState<string>("video");
-   const [selcted, setSelected] = useState<string>("...");
 
   const { toast } = useToast();
 
@@ -78,11 +77,15 @@ const DropZone = () => {
     );
   };
 
-  //  const load = async () => {
-  //   const ffmpegResponse: FFmpeg = await loadFfmpeg();
-  //   ffmpegRef.current = ffmpegResponse;
-  //   setIsLoaded(true);
-  // };
+  useEffect(() => {
+    load();
+  }, []);
+
+   const load = async () => {
+    // const ffmpegResponse: FFmpeg = await loadFfmpeg();
+    // ffmpegRef.current = ffmpegResponse;
+    setIsLoaded(true);
+  };
 
   if (actions.length) {
     return (
@@ -137,10 +140,8 @@ const DropZone = () => {
                     } else if (extensions.video.includes(value)) {
                       setDefaultValues("video");
                     }
-                    setSelected(value);
                     updateAction(action.file_name, value);
                   }}
-                  value={selcted}
                 >
                   <SelectTrigger className="w-32 outline-none focus:outline-none focus:ring-0 text-center text-gray-600 bg-gray-50 text-md font-medium">
                     <SelectValue placeholder="..." />
