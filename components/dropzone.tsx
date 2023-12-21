@@ -1,22 +1,24 @@
 "use client";
 
-import bytesToSize from "@/bytes-to-size";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { accepted_files, extensions } from "@/config/constants";
 import { Action } from "@/types";
+import bytesToSize from "@/utils/bytes-to-size";
 import compressFileName from "@/utils/compress-file-name";
+import convertFile from "@/utils/convert";
 import fileToIcon from "@/utils/file-to-icon";
-import { useEffect, useState } from "react";
+import loadFfmpeg from "@/utils/load-ffmpeg";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { useEffect, useRef, useState } from "react";
 import ReactDropzone from "react-dropzone";
-import { FiUploadCloud } from "react-icons/fi";
-import { LuFileSymlink } from "react-icons/lu";
-import { Badge } from "./ui/badge";
-import { Skeleton } from "./ui/skeleton";
-import { useToast } from "./ui/use-toast";
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BiError } from "react-icons/bi";
+import { FiUploadCloud } from "react-icons/fi";
+import { HiOutlineDownload } from "react-icons/hi";
 import { ImSpinner3 } from "react-icons/im";
-import { MdDone } from "react-icons/md";
+import { LuFileSymlink } from "react-icons/lu";
+import { MdClose, MdDone } from "react-icons/md";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 import {
   Select,
   SelectContent,
@@ -24,19 +26,92 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Skeleton } from "./ui/skeleton";
+import { useToast } from "./ui/use-toast";
 
 const DropZone = () => {
   const [isHover, setIsHover] = useState<boolean>(false);
   const [actions, setActions] = useState<Action[]>([]);
-  const [files, setFiles] = useState<Array<any>>([]);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [defaultValues, setDefaultValues] = useState<string>("video");
+  const [isDone, setIsDone] = useState<boolean>(false);
+  const [isReady, setIsReady] = useState<boolean>(false);
+  const [isConverting, setIsConverting] = useState<boolean>(false);
 
+  const ffmpegRef = useRef<any>(null);
   const { toast } = useToast();
+
+  //functions
+
+  function reset() {
+    setIsDone(false);
+    setActions([]);
+    setIsReady(false);
+    setIsConverting(false);
+  }
+
+  function download(action: Action) {
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = action.url;
+    a.download = action.output;
+
+    document.body.appendChild(a);
+    a.click();
+
+    // Clean up after download
+    URL.revokeObjectURL(action.url);
+    document.body.removeChild(a);
+  }
+
+  function downloadAll(): void {
+    for (let action of actions) {
+      !action.is_error && download(action);
+    }
+  }
+
+  async function convert(): Promise<any> {
+    let tmp_actions = actions.map((elt) => ({
+      ...elt,
+      is_converting: true,
+    }));
+    setActions(tmp_actions);
+    setIsConverting(true);
+    for (let action of tmp_actions) {
+      try {
+        const { url, output } = await convertFile(ffmpegRef.current, action);
+        tmp_actions = tmp_actions.map((elt) =>
+          elt === action
+            ? {
+                ...elt,
+                is_converted: true,
+                is_converting: false,
+                url,
+                output,
+              }
+            : elt
+        );
+        setActions(tmp_actions);
+      } catch (err) {
+        tmp_actions = tmp_actions.map((elt) =>
+          elt === action
+            ? {
+                ...elt,
+                is_converted: false,
+                is_converting: false,
+                is_error: true,
+              }
+            : elt
+        );
+        setActions(tmp_actions);
+      }
+    }
+    setIsDone(true);
+    setIsConverting(false);
+  }
 
   function handleUpload(data: Array<any>): void {
     handleExitHover();
-    setFiles(data);
     const temp: Action[] = data.map((file: any) => {
       return {
         file_name: file.name,
@@ -61,11 +136,10 @@ const DropZone = () => {
     setIsHover(false);
   }
 
-  const updateAction = (file_name: String, to: String) => {
+  function updateAction(file_name: String, to: String) {
     setActions(
       actions.map((action): Action => {
         if (action.file_name === file_name) {
-          console.log("FOUND");
           return {
             ...action,
             to,
@@ -75,17 +149,37 @@ const DropZone = () => {
         return action;
       })
     );
-  };
+  }
+
+  function deleteAction(action: Action): void {
+    setActions(actions.filter((elt) => elt !== action));
+  }
+
+  function checkIsReady(): void {
+    let tmp_is_ready = true;
+    actions.forEach((action: Action) => {
+      if (!action.to) tmp_is_ready = false;
+    });
+    setIsReady(tmp_is_ready);
+  }
+
+  useEffect(() => {
+    if (!actions.length) {
+      setIsDone(false);
+      setIsReady(false);
+      setIsConverting(false);
+    } else checkIsReady();
+  }, [actions]);
 
   useEffect(() => {
     load();
   }, []);
 
-   const load = async () => {
-    // const ffmpegResponse: FFmpeg = await loadFfmpeg();
-    // ffmpegRef.current = ffmpegResponse;
+  async function load() {
+    const ffmpegResponse: FFmpeg = await loadFfmpeg();
+    ffmpegRef.current = ffmpegResponse;
     setIsLoaded(true);
-  };
+  }
 
   if (actions.length) {
     return (
@@ -93,7 +187,7 @@ const DropZone = () => {
         {actions.map((action: Action, index: number) => (
           <div
             key={index}
-            className="w-full py-4 space-y-2 lg:py-0 relative cursor-pointer rounded-xl border h-fit lg:h-20 px-4 lg:px-10 flex flex-wrap lg:flex-nowrap items-center justify-between"
+            className="w-full py-4 space-y-2 lg:py-0 relative cursor-pointer rounded-xl border h-fit lg:h-20 px-4 lg:px-10 flex flex-wrap gap-x-4 lg:flex-nowrap items-center justify-between"
           >
             {!isLoaded && (
               <Skeleton className="h-full w-full -ml-10 cursor-progress absolute rounded-xl" />
@@ -103,7 +197,7 @@ const DropZone = () => {
               <span className="text-2xl text-orange-600">
                 {fileToIcon(action.file_type)}
               </span>
-              <div className="flex items-center gap-1 w-96">
+              <div className="flex items-center gap-1 md:w-96">
                 <span className="text-md font-medium overflow-x-hidden">
                   {compressFileName(action.file_name)}
                 </span>
@@ -131,7 +225,7 @@ const DropZone = () => {
                 </span>
               </Badge>
             ) : (
-              <div className="text-gray-400 text-md flex items-center gap-4">
+              <div className="text-gray-400 text-md flex flex-wrap items-center gap-4">
                 <span>Convert to</span>
                 <Select
                   onValueChange={(value) => {
@@ -207,8 +301,59 @@ const DropZone = () => {
                 </Select>
               </div>
             )}
+
+            {action.is_converted ? (
+              <Button variant="outline" onClick={() => download(action)}>
+                Download
+              </Button>
+            ) : (
+              <span
+                onClick={() => deleteAction(action)}
+                className="cursor-pointer hover:bg-gray-50 rounded-full h-10 w-10 flex items-center justify-center text-2xl text-gray-400"
+              >
+                <MdClose />
+              </span>
+            )}
           </div>
         ))}
+
+        <div className="flex w-full justify-end">
+          {isDone ? (
+            <div className="space-y-4 w-fit">
+              <Button
+                size="lg"
+                className="rounded-xl font-semibold relative py-4 text-md flex gap-2 items-center w-full"
+                onClick={downloadAll}
+              >
+                {actions.length > 1 ? "Download All" : "Download"}
+                <HiOutlineDownload />
+              </Button>
+              <Button
+                size="lg"
+                onClick={reset}
+                variant="outline"
+                className="rounded-xl"
+              >
+                Convert Another File(s)
+              </Button>
+            </div>
+          ) : (
+            <Button
+              size="lg"
+              disabled={!isReady || isConverting}
+              className="rounded-xl font-semibold relative py-4 text-md flex items-center w-44"
+              onClick={convert}
+            >
+              {isConverting ? (
+                <span className="animate-spin text-lg">
+                  <ImSpinner3 />
+                </span>
+              ) : (
+                <span>Convert Now</span>
+              )}
+            </Button>
+          )}
+        </div>
       </section>
     );
   }
