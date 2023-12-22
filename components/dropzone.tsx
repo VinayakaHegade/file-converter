@@ -8,11 +8,11 @@ import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { useEffect, useRef, useState } from "react";
 import ReactDropzone from "react-dropzone";
 import { FiUploadCloud } from "react-icons/fi";
-import { HiOutlineDownload } from "react-icons/hi";
-import { ImSpinner3 } from "react-icons/im";
 import { LuFileSymlink } from "react-icons/lu";
+import ConvertButton from "./action_buttons/convert-button";
+import DownloadButton from "./action_buttons/download-button";
+import ResetButton from "./action_buttons/reset-button";
 import FileAction from "./file-action";
-import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
 
 const DropZone = () => {
@@ -182,38 +182,11 @@ const DropZone = () => {
         <div className="flex w-full justify-end">
           {isDone ? (
             <div className="space-y-4 w-fit">
-              <Button
-                size="lg"
-                className="rounded-xl font-semibold relative py-4 text-md flex gap-2 items-center w-full"
-                onClick={downloadAll}
-              >
-                {actions.length > 1 ? "Download All" : "Download"}
-                <HiOutlineDownload />
-              </Button>
-              <Button
-                size="lg"
-                onClick={reset}
-                variant="outline"
-                className="rounded-xl"
-              >
-                Convert Another File(s)
-              </Button>
+              <DownloadButton actions={actions} downloadAll={downloadAll} />
+              <ResetButton reset={reset} />
             </div>
           ) : (
-            <Button
-              size="lg"
-              disabled={!isReady || isConverting}
-              className="rounded-xl font-semibold relative py-4 text-md flex items-center w-44"
-              onClick={convert}
-            >
-              {isConverting ? (
-                <span className="animate-spin text-lg">
-                  <ImSpinner3 />
-                </span>
-              ) : (
-                <span>Convert Now</span>
-              )}
-            </Button>
+            <ConvertButton isConverting isReady convert={convert} />
           )}
         </div>
       </section>
