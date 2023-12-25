@@ -24,9 +24,9 @@ export default async function convertFile(
   action: Action
 ): Promise<any> {
   const { file, to, file_name, file_type } = action;
-  const inputFormat = getFileExtension(file_name);
-  const outputFormat = removeFileExtension(file_name) + "." + to;
-  ffmpeg.writeFile(inputFormat, await fetchFile(file));
+  const input = getFileExtension(file_name);
+  const output = removeFileExtension(file_name) + "." + to;
+  ffmpeg.writeFile(input, await fetchFile(file));
 
   // FFMEG COMMANDS
   let ffmpeg_cmd: any = [];
@@ -34,7 +34,7 @@ export default async function convertFile(
   if (to === "3gp")
     ffmpeg_cmd = [
       "-i",
-      inputFormat,
+      input,
       "-r",
       "20",
       "-s",
@@ -51,15 +51,15 @@ export default async function convertFile(
       "8000",
       "-ab",
       "24k",
-      outputFormat,
+      output,
     ];
-  else ffmpeg_cmd = ["-i", inputFormat, outputFormat];
+  else ffmpeg_cmd = ["-i", input, output];
 
   // execute cmd
   await ffmpeg.exec(ffmpeg_cmd);
 
-  const data = (await ffmpeg.readFile(outputFormat)) as any;
+  const data = (await ffmpeg.readFile(output)) as any;
   const blob = new Blob([data], { type: file_type.split("/")[0] });
   const url = URL.createObjectURL(blob);
-  return { url, outputFormat };
+  return { url, output };
 }

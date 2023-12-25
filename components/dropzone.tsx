@@ -81,7 +81,7 @@ const DropZone = () => {
     setIsConverting(true);
     for (let action of tmp_actions) {
       try {
-        const { url, outputFormat } = await convertFile(ffmpegRef.current, action);
+        const { url, output } = await convertFile(ffmpegRef.current, action);
         tmp_actions = tmp_actions.map((elt) =>
           elt === action
             ? {
@@ -89,7 +89,7 @@ const DropZone = () => {
                 is_converted: true,
                 is_converting: false,
                 url,
-                outputFormat,
+                output,
               }
             : elt
         );
