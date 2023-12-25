@@ -81,7 +81,7 @@ const DropZone = () => {
     setIsConverting(true);
     for (let action of tmp_actions) {
       try {
-        const { url, output } = await convertFile(ffmpegRef.current, action);
+        const { url, outputFormat } = await convertFile(ffmpegRef.current, action);
         tmp_actions = tmp_actions.map((elt) =>
           elt === action
             ? {
@@ -89,7 +89,7 @@ const DropZone = () => {
                 is_converted: true,
                 is_converting: false,
                 url,
-                output,
+                outputFormat,
               }
             : elt
         );
@@ -186,7 +186,11 @@ const DropZone = () => {
               <ResetButton reset={reset} />
             </div>
           ) : (
-            <ConvertButton isConverting isReady convert={convert} />
+            <ConvertButton
+              isConverting={isConverting}
+              isReady={isReady}
+              convert={convert}
+            />
           )}
         </div>
       </section>
