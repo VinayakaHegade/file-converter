@@ -243,7 +243,7 @@ const DropZone = () => {
                 <div className="justify-center flex text-6xl">
                   <FiUploadCloud />
                 </div>
-                <h3 className="text-center font-medium text-2xl">
+                <h3 className="text-center font-medium text-2xl px-4">
                   Click, or drop your files here
                 </h3>
               </>
