@@ -13,7 +13,7 @@ const FileInfoDisplay = ({ action }: FileInfoDisplayProps) => {
       <span className="text-2xl text-orange-600">
         {fileToIcon(action.file_type)}
       </span>
-      <div className="flex items-center gap-1 md:w-96">
+      <div className="flex items-center gap-1 flex-wrap md:w-96">
         <span className="text-md font-medium overflow-x-hidden">
           {compressFileName(action.file_name)}
         </span>

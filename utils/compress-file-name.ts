@@ -1,6 +1,6 @@
 export default function compressFileName(fileName: any): string {
   // Define the maximum length for the substring
-  const maxSubstrLength = 18;
+  const maxSubstrLength = 16;
 
   // Check if the fileName is longer than the maximum length
   if (fileName.length > maxSubstrLength) {
