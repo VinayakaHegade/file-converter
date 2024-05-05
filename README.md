@@ -31,7 +31,7 @@ Join us in redefining the digital experience. Try Convio today!
 ## How to run the app locally
 
 1. Clone this repository.
-2. Navigate to the project directory.
+2. Navigate to the project directory and install the dependencies using package manager of your choice.
 3. Run the development server:
 
 ```bash
